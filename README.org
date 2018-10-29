@@ -1,4 +1,54 @@
 * vector-classes: optimized vector containers
-** Motivation
+** What it is?
 This packages provides support for so called vector classes. Vector class is like standard-class but it also provides support for additional slot options that allows to distinguish
-between so called (from now) scalar slots (ordinary slots, as already present in the Common Lisp) and
+between so called (from now on) scalar slots (ordinary slots, as already present in the Common Lisp) and vector slots. Vector slots contain (potentially) large number of elements and
+are implemented as simple, specialized arrays. All vector-slots in object have equal primary dimensions.
+
+** Motivation
+This package is inteded to be used to build code that requires storing multiple numerical values for each element. By wrapping those vectors into single object it becomes possible to
+write more redeable, shorter and overall better code while maintaining optimal performance.
+
+** How does it work?
+Instances of DATA-CLASS carry information regarding typing and dimensionality of the slots. Those information are also available during macroexpand which allows with-vectors macro to
+generate relevant type declarations based on the class name. This also changes how readers and writers are constructed. Readers, instead of accepting just the object, will also accept &rest
+argument that is supposed to contain the correct array index. Same applies to the writers and accessors.
+
+* Using this system
+** Defining data-classes
+It is advised to use define-data macro to accomplish this task. Syntax is almost identical to the defclass form. For example:
+#+BEGIN_SRC common-lisp
+(define-data data-layer ()
+  ((%vectorized-data :initarg :vectorized-data
+                     :vector t
+                     :type single-float
+                     :reader vectorized-data)))
+#+END_SRC
+The above ensures that %vectorized-data holds vector of single-floats.
+
+** Initializing data-classes
+All classes defined using data-layer inherit %size slot that informs how large inner arrays are. After initialization the size of inner arrays cannot be changed.
+To construct the data-layer instance, use make-data generic function. Pass name of the class as the first argument, pass size as the second argument, then pass initargs.
+For example:
+#+BEGIN_SRC common-lisp
+(make-data 'data-layer 5000 :vectorized-data 42.0)
+#+END_SRC
+Will ensures that content of the %vectorized-data slot will be simple-array holding single-floats of size 5000 and initialized with value 42.0.
+
+** Using reader functions
+Simply pass index as additional arguments to the reader function. For instance:
+#+BEGIN_SRC common-lisp
+(vectorized-data instance 0)
+#+END_SRC
+Will obtain the first value of %vectorized-data from the instance object.
+
+** using with-vectors macro
+With-vectors macro simplifies working with the data-classes. It establishes macrolet bindings that allow to access content of the object under the partially specified index. Providing name of the class
+allows macro to insert type declarations into the generated code.
+For instance:
+#+BEGIN_SRC common-lisp
+(with-vectors ((vectorized-data %vectorized-data)) i instance data-layer
+  (dotimes (i 5000)
+    (print (vectorized-data))))
+#+END_SRC
+Will print every element of the %vectorized-data slot present of the instance constructed by the prior example. data-layer argument here designates the name of the class is optional, but once supplied
+allows to generate more efficient code.
