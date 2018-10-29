@@ -23,14 +23,23 @@ It is advised to use define-data macro to accomplish this task. Syntax is almost
                      :type single-float
                      :reader vectorized-data)))
 #+END_SRC
-The above ensures that %vectorized-data holds vector of single-floats.
+The above ensures that %vectorized-data holds vector of single-floats and will expand into something that looks like this:
+#+BEGIN_SRC common-lisp
+(EVAL-WHEN (:COMPILE-TOPLEVEL :LOAD-TOPLEVEL :EXECUTE)
+  (DEFCLASS DATA-LAYER (FUNDAMENTAL-DATA)
+            ((%VECTORIZED-DATA :INITARG :VECTORIZED-DATA :VECTOR T :TYPE
+              SINGLE-FLOAT :READER VECTORIZED-DATA))
+            (:METACLASS DATA-CLASS)))
+#+END_SRC common-lisp
+DATA-CLASS and FUNDAMENTAL-DATA form a pair of metaclass and base class (one for altering behavior during class defintion, and one to store fundamental slots).
 
 ** Initializing data-classes
 All classes defined using data-layer inherit %size slot that informs how large inner arrays are. After initialization the size of inner arrays cannot be changed.
-To construct the data-layer instance, use make-data generic function. Pass name of the class as the first argument, pass size as the second argument, then pass initargs.
+To construct the data-layer instance, use make-data generic function which mimicks make-instance. Pass name of the class as the first argument,
+pass size as the second argument, then pass initargs.
 For example:
 #+BEGIN_SRC common-lisp
-(make-data 'data-layer 5000 :vectorized-data 42.0)
+(setq instance (make-data 'data-layer 5000 :vectorized-data 42.0))
 #+END_SRC
 Will ensures that content of the %vectorized-data slot will be simple-array holding single-floats of size 5000 and initialized with value 42.0.
 
