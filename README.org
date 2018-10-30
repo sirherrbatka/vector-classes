@@ -1,0 +1,4 @@
+* vector-classes: optimized vector containers
+** Motivation
+This packages provides support for so called vector classes. Vector class is like standard-class but it also provides support for additional slot options that allows to distinguish
+between so called (from now) scalar slots (ordinary slots, as already present in the Common Lisp) and
