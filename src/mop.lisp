@@ -48,8 +48,6 @@
   (defclass fundamental-data ()
     ((%size :initarg :size
             :reader read-size
-            :scalar t
+            :vector nil
             :initform 0))
     (:metaclass data-class)))
-
-

@@ -12,5 +12,5 @@
   :components ((:file "package")
                (:file "mop")
                (:file "protocol")
-               (:file "api")))
+               (:file "api"))
   :description "Provides metaclass for classes storing vectors of heterogenous types.")
