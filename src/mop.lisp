@@ -5,9 +5,10 @@
     ((%count-arg :initarg :count-arg
                  :reader read-count-arg
                  :initform nil)
-     (%scalar :initarg :scalar
-              :reader read-scalar
-              :initform t)
+     (%vector :initarg :vector
+              :reader read-vector
+              :type boolean
+              :initform nil)
      (%count-form :initarg :count-form
                   :reader read-count-form
                   :initform 1))))
