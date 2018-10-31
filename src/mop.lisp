@@ -1,7 +1,7 @@
 (in-package :vector-classes)
 
 (eval-always
-  (defclass data-slot-definition (closer-mop:slot-definition)
+  (defclass data-slot-definition (c2mop:slot-definition)
     ((%count-arg :initarg :count-arg
                  :reader read-count-arg
                  :initform nil)
@@ -43,6 +43,13 @@
                                                     &rest initargs)
     (declare (ignore initargs))
     (find-class 'effective-data-slot-definition)))
+
+(eval-always
+  (defmethod c2mop:compute-effective-slot-definition
+      ((class data-class) name direct-slot-definitions)
+    (declare (ignore name))
+    (let ((result (call-next-method)))
+      result)))
 
 (eval-always
   (defclass fundamental-data ()
