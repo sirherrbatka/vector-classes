@@ -1,7 +1,7 @@
 (in-package :vector-classes)
 
 (eval-always
-  (defclass data-slot-definition (c2mop:slot-definition)
+  (defclass data-slot-definition (c2mop:standard-slot-definition)
     ((%count-arg :initarg :count-arg
                  :reader read-count-arg
                  :initform nil)
@@ -15,12 +15,12 @@
 
 (eval-always
   (defclass direct-data-slot-definition (data-slot-definition
-                                         c2mop:direct-slot-definition)
+                                         c2mop:standard-direct-slot-definition)
     ()))
 
 (eval-always
   (defclass effective-data-slot-definition (data-slot-definition
-                                            c2mop:effective-slot-definition)
+                                            c2mop:standard-effective-slot-definition)
     ()))
 
 (eval-always
