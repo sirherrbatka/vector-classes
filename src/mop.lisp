@@ -2,16 +2,16 @@
 
 (eval-always
   (defclass data-slot-definition (c2mop:standard-slot-definition)
-    ((%count-arg :initarg :count-arg
-                 :reader read-count-arg
-                 :initform nil)
-     (%vector :initarg :vector
-              :reader read-vector
-              :type boolean
-              :initform nil)
-     (%count-form :initarg :count-form
-                  :reader read-count-form
-                  :initform 1))))
+    ((%dimensions-arg :initarg :dimesnisions-arg
+                      :reader read-dimensions-arg
+                      :initform nil)
+     (%dimensions-form :initarg :dimensions-form
+                       :reader read-dimensions-form
+                       :initform nil)
+     (%array :initarg :array
+             :reader read-array
+             :type boolean
+             :initform nil))))
 
 (eval-always
   (defclass direct-data-slot-definition (data-slot-definition
@@ -46,8 +46,9 @@
 
 (eval-always
   (defun forward-added-slots (effective-slot direct-slot)
-    (setf (slot-value effective-slot '%vector) (slot-value direct-slot '%vector)
-          (slot-value effective-slot '%count-form) (slot-value direct-slot '%count-form))
+    (setf (slot-value effective-slot '%array) (slot-value direct-slot '%array)
+          (slot-value effective-slot '%dimensions-form)
+          (slot-value direct-slot '%dimensions-form))
     effective-slot))
 
 (eval-always
@@ -63,5 +64,5 @@
       (error "Slot definitions are incompatible."))
     (lret ((result (call-next-method)))
       (forward-added-slots result (car direct-slot-definitions))
-      (setf (slot-value result '%count-arg)
-            (mapcar #'read-count-arg direct-slot-definitions)))))
+      (setf (slot-value result '%dimensions-arg)
+            (mapcar #'read-dimensions-arg direct-slot-definitions)))))

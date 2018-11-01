@@ -24,15 +24,43 @@
 
 
 (declaim (inline getf-one-of-many))
+(defun getf-one-of-many (place &rest arguments)
+  (iterate
+    (for v on place)
+    (for p-v previous v)
+    (for k initially t then (not k))
+    (when (and k
+               (member p-v arguments))
+      (return (values v t))))
+  (values nil nil))
+
+
 (eval-always
-  (defun getf-one-of-many (place &rest arguments)
-    (iterate
-      (for v on place)
-      (for p-v previous v)
-      (for k initially t then (not k))
-      (when (and k
-                 (member p-v arguments))
-        (return v)))))
+  (defun unfold-array (array)
+    (make-array (reduce #'* (array-dimensions array))
+                :displaced-to array)))
+
+
+(defun generate-array-initialization-form (slot size initargs)
+  (let* ((initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
+         (slot-initform (when initform-present-p
+                          (c2mop:slot-definition-initform slot)))
+         (slot-initargs (c2mop:slot-definition-initargs slot))
+         (type (c2mop:slot-definition-type slot))
+         (dimensions-arg (read-dimensions-arg slot))
+         (dimensions-form (read-dimensions-form slot))
+         (!dims (gensym))
+         (!array (gensym))
+         (!val (gensym))
+         (!found (gensym))
+         (!vector (gensym)))
+    `(bind ((,!dims ,(if dimensions-arg
+                         `(or (getf-one-of-many ,initargs ,@dimensions-arg)
+                              ,dimensions-form)
+                          dimensions-form))
+            (,!array (make-array (cons ,size ,!dims) :element-type ',type))
+            (,!vector (unfold-array ,!array)))
+       )))
 
 
 (eval-always
@@ -48,25 +76,13 @@
            (type (c2mop:slot-definition-type slot))
            (count-arg (read-count-arg slot))
            (count-form (read-count-form slot))
+           (!array (gensym))
            (!size (gensym)))
       (if is-vector-p
+          nil
           (if (endp slot-initargs)
               (when initform-present-p
-                `(let ((,!size (read-size ,instance-name)))
-                   (setf #1=(slot-value ,instance-name ',slot-name)
-                         (map-into (make-array ,!size :element-type ',type)
-                                   (lambda () ,slot-initform)))))
-              `(let ((,!size (read-size ,instance-name)))
-                 (setf #1#
-                       (map-into (make-array ,!size :element-type ',type)
-                                 ,(if initform-present-p
-                                      `(or (when-let ((val (getf-one-of-many ,initargs-name
-                                                                             ,@slot-initargs)))
-                                             (constantly val))
-                                           (lambda () ,slot-initform)))))))
-          (if (endp slot-initargs)
-              (when initform-present-p
-                `(setf #1#
+                `(setf #1=(slot-value ,instance-name ',slot-name)
                        ,slot-initform))
               (if initform-present-p
                   `(setf #1#
