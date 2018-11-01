@@ -46,8 +46,7 @@
 
 (eval-always
   (defun forward-added-slots (effective-slot direct-slot)
-    (setf (slot-value effective-slot '%count-arg) (slot-value direct-slot '%count-arg)
-          (slot-value effective-slot '%vector) (slot-value direct-slot '%vector)
+    (setf (slot-value effective-slot '%vector) (slot-value direct-slot '%vector)
           (slot-value effective-slot '%count-form) (slot-value direct-slot '%count-form))
     effective-slot))
 
@@ -63,4 +62,8 @@
     (unless (direct-slot-definitions-compatible-p direct-slot-definitions)
       (error "Slot definitions are incompatible."))
     (lret ((result (call-next-method)))
-      (forward-added-slots result (car direct-slot-definitions)))))
+      (forward-added-slots result (car direct-slot-definitions))
+      (setf (slot-value result '%count-arg) (reduce (flip #'cons)
+                                                    direct-slot-definitions
+                                                    :key #'read-count-arg
+                                                    :initial-value nil)))))

@@ -1,7 +1,8 @@
 (defpackage vector-classes
   (:use :cl)
   (:import-from :serapeum
-                #:lret #:not #:eval-always)
+                #:lret #:not #:eval-always
+                #:flip)
   (:import-from :alexandria
                 #:if-let #:non-negative-fixnum
                 #:curry #:rcurry #:when-let)
