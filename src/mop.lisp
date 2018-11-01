@@ -1,5 +1,6 @@
 (in-package :vector-classes)
 
+
 (eval-always
   (defclass data-slot-definition (c2mop:standard-slot-definition)
     ((%dimensions-arg :initarg :dimensions-arg
@@ -13,24 +14,29 @@
              :type boolean
              :initform nil))))
 
+
 (eval-always
   (defclass direct-data-slot-definition (data-slot-definition
                                          c2mop:standard-direct-slot-definition)
     ()))
+
 
 (eval-always
   (defclass effective-data-slot-definition (data-slot-definition
                                             c2mop:standard-effective-slot-definition)
     ()))
 
+
 (eval-always
   (defclass data-class (closer-mop:standard-class)
     ()))
+
 
 (eval-always
   (defmethod c2mop:validate-superclass ((class data-class)
                                         (super c2mop:standard-class))
     t))
+
 
 (eval-always
   (defmethod c2mop:direct-slot-definition-class ((class data-class)
@@ -38,11 +44,13 @@
     (declare (ignore initargs))
     (find-class 'direct-data-slot-definition)))
 
+
 (eval-always
   (defmethod c2mop:effective-slot-definition-class ((class data-class)
                                                     &rest initargs)
     (declare (ignore initargs))
     (find-class 'effective-data-slot-definition)))
+
 
 (eval-always
   (defun forward-added-slots (effective-slot direct-slot)
@@ -51,10 +59,12 @@
           (slot-value direct-slot '%dimensions-form))
     effective-slot))
 
+
 (eval-always
   (defun direct-slot-definitions-compatible-p (direct-slot-definitions)
     ;; TODO
     t))
+
 
 (eval-always
   (defmethod c2mop:compute-effective-slot-definition
