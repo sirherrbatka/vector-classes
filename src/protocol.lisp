@@ -5,7 +5,7 @@
   (defclass fundamental-data ()
     ((%size :initarg :size
             :reader read-size
-            :vector nil
+            :array nil
             :initform 0))
     (:metaclass data-class)))
 
@@ -52,15 +52,22 @@
          (!dims (gensym))
          (!array (gensym))
          (!val (gensym))
-         (!found (gensym))
-         (!vector (gensym)))
+         (!found (gensym)))
     `(bind ((,!dims ,(if dimensions-arg
                          `(or (getf-one-of-many ,initargs ,@dimensions-arg)
                               ,dimensions-form)
                           dimensions-form))
             (,!array (make-array (cons ,size ,!dims) :element-type ',type))
-            (,!vector (unfold-array ,!array)))
-       )))
+            (,!val (bind (((:values ,!val ,!found)
+                           (getf-one-of-many ,initargs ,@slot-initargs)))
+                     (if ,!found
+                         (constantly ,!val)
+                         ,(if initform-present-p
+                              `(lambda () ,slot-initform)
+                              nil)))))
+       (when ,!val
+         (map-into (unfold-array ,!array) ,!val))
+       ,!array)))
 
 
 (eval-always
@@ -72,18 +79,15 @@
            (slot-initform (when initform-present-p
                             (c2mop:slot-definition-initform slot)))
            (slot-initargs (c2mop:slot-definition-initargs slot))
-           (is-vector-p (read-vector slot))
-           (type (c2mop:slot-definition-type slot))
-           (count-arg (read-count-arg slot))
-           (count-form (read-count-form slot))
-           (!array (gensym))
-           (!size (gensym)))
-      (if is-vector-p
-          nil
+           (is-array-p (read-array slot)))
+      (if is-array-p
+          `(setf #1=(slot-value ,instance-name ',slot-name)
+                 ,(generate-array-initialization-form slot
+                                                      `(read-size ,instance-name)
+                                                      initargs-name))
           (if (endp slot-initargs)
               (when initform-present-p
-                `(setf #1=(slot-value ,instance-name ',slot-name)
-                       ,slot-initform))
+                `(setf #1#,slot-initform))
               (if initform-present-p
                   `(setf #1#
                          (or (getf-one-of-many ,initargs-name ,@slot-initargs)
@@ -94,7 +98,8 @@
 
 (eval-always
   (defun generate-initialization-function (class)
-    `(lambda (class instance initiargs)
+    `(lambda (class instance initargs)
+       (declare (ignore class))
       ,@(let ((slots (c2mop:class-slots class)))
           (iterate
             (for slot in slots)
@@ -111,6 +116,7 @@ We need to establish proper initialize-slots function for each class. This metho
                                 &rest initargs
                                 &key &allow-other-keys)
     (declare (ignore initargs))
+    (call-next-method)
     (c2mop:ensure-finalized instance)
     (let* ((gf #'initialize-slots)
            (lambda-form (generate-initialization-function instance)))

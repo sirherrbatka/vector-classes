@@ -2,7 +2,7 @@
 
 (eval-always
   (defclass data-slot-definition (c2mop:standard-slot-definition)
-    ((%dimensions-arg :initarg :dimesnisions-arg
+    ((%dimensions-arg :initarg :dimensions-arg
                       :reader read-dimensions-arg
                       :initform nil)
      (%dimensions-form :initarg :dimensions-form
