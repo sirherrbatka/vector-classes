@@ -7,3 +7,13 @@
        ,direct-slots
        ,@options
        (:metaclass data-class))))
+
+
+(defgeneric make-data (type size &rest arguments))
+
+
+(defmethod make-data (type size &rest arguments)
+  (let* ((class (find-class type))
+         (instance (allocate-data class size arguments)))
+    (initialize-slots class instance arguments)
+    instance))

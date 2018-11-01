@@ -45,16 +45,22 @@
     (find-class 'effective-data-slot-definition)))
 
 (eval-always
+  (defun forward-added-slots (effective-slot direct-slot)
+    (setf (slot-value effective-slot '%count-arg) (slot-value direct-slot '%count-arg)
+          (slot-value effective-slot '%vector) (slot-value direct-slot '%vector)
+          (slot-value effective-slot '%count-form) (slot-value direct-slot '%count-form))
+    effective-slot))
+
+(eval-always
+  (defun direct-slot-definitions-compatible-p (direct-slot-definitions)
+    ;; TODO
+    t))
+
+(eval-always
   (defmethod c2mop:compute-effective-slot-definition
       ((class data-class) name direct-slot-definitions)
     (declare (ignore name))
-    (let ((result (call-next-method)))
-      result)))
-
-(eval-always
-  (defclass fundamental-data ()
-    ((%size :initarg :size
-            :reader read-size
-            :vector nil
-            :initform 0))
-    (:metaclass data-class)))
+    (unless (direct-slot-definitions-compatible-p direct-slot-definitions)
+      (error "Slot definitions are incompatible."))
+    (lret ((result (call-next-method)))
+      (forward-added-slots result (car direct-slot-definitions)))))
