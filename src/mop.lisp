@@ -63,7 +63,5 @@
       (error "Slot definitions are incompatible."))
     (lret ((result (call-next-method)))
       (forward-added-slots result (car direct-slot-definitions))
-      (setf (slot-value result '%count-arg) (reduce (flip #'cons)
-                                                    direct-slot-definitions
-                                                    :key #'read-count-arg
-                                                    :initial-value nil)))))
+      (setf (slot-value result '%count-arg)
+            (mapcar #'read-count-arg direct-slot-definitions)))))
