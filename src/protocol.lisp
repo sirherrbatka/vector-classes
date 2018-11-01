@@ -82,11 +82,10 @@
   (defun generate-initialization-function (class)
     `(lambda (class instance initargs)
        (declare (ignore class))
-      ,@(let ((slots (c2mop:class-slots class)))
-          (iterate
-            (for slot in slots)
-            (collecting (generate-slot-initialization-form
-                         slot 'instance 'initargs)))))))
+      ,@(iterate
+          (for slot in (c2mop:class-slots class))
+          (collecting (generate-slot-initialization-form
+                       slot 'instance 'initargs))))))
 
 
 #|
