@@ -23,24 +23,6 @@
   (defgeneric initialize-slots (class instance arguments)))
 
 
-(declaim (inline getf-one-of-many))
-(defun getf-one-of-many (place &rest arguments)
-  (iterate
-    (for v on place)
-    (for p-v previous v)
-    (for k initially t then (not k))
-    (when (and k
-               (member p-v arguments))
-      (return (values v t))))
-  (values nil nil))
-
-
-(eval-always
-  (defun unfold-array (array)
-    (make-array (reduce #'* (array-dimensions array))
-                :displaced-to array)))
-
-
 (defun generate-array-initialization-form (slot size initargs)
   (let* ((initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
          (slot-initform (when initform-present-p
