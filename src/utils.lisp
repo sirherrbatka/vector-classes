@@ -15,7 +15,8 @@
 
 (defun unfold-array (array)
   (make-array (reduce #'* (array-dimensions array))
-              :displaced-to array))
+              :displaced-to array
+              :element-type (array-element-type array)))
 
 
 (eval-always
