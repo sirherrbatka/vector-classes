@@ -23,6 +23,12 @@
   (defgeneric initialize-slots (class instance arguments)))
 
 
+(eval-always
+  (defun fixed-dimensions-p (slot)
+    (check-type slot effective-data-slot-definition)
+    (endp (read-dimensions-arg slot))))
+
+
 (defun generate-array-initialization-form (slot size initargs)
   (let* ((initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
          (slot-initform (when initform-present-p
@@ -35,7 +41,7 @@
          (!array (gensym))
          (!val (gensym))
          (!found (gensym)))
-    `(bind ((,!dims ,(if dimensions-arg
+    `(let* ((,!dims ,(if dimensions-arg
                          `(or (getf-one-of-many ,initargs ,@dimensions-arg)
                               ,dimensions-form)
                           dimensions-form))

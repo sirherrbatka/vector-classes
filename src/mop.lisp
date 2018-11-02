@@ -28,12 +28,6 @@
 
 
 (eval-always
-  (defun fixed-dimensions-p (slot)
-    (check-type slot effective-data-slot-definition)
-    (endp (read-dimensions-arg slot))))
-
-
-(eval-always
   (defclass data-class (closer-mop:standard-class)
     ()))
 
