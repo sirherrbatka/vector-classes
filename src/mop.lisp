@@ -62,8 +62,9 @@
 
 (eval-always
   (defun direct-slot-definitions-compatible-p (direct-slot-definitions)
-    ;; TODO
-    t))
+    (let ((all-array (mapcar #'read-array direct-slot-definitions)))
+      (every (curry #'eql (first all-array))
+             (rest all-array)))))
 
 
 (eval-always
