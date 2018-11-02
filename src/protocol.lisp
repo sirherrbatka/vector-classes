@@ -63,7 +63,8 @@
                                             instance-name
                                             initargs-name)
     (let* ((slot-name (c2mop:slot-definition-name slot))
-           (initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
+           (initform-present-p (~> slot c2mop:slot-definition-initfunction
+                                   null not))
            (slot-initform (when initform-present-p
                             (c2mop:slot-definition-initform slot)))
            (slot-initargs (c2mop:slot-definition-initargs slot))
@@ -87,7 +88,8 @@
 (eval-always
   (defun generate-initialization-function (class)
     `(lambda (class instance initargs)
-       (declare (ignore class))
+       (declare (ignore class)
+                #+sbcl(sb-ext:muffle-conditions sb-ext:compiler-note))
       ,@(iterate
           (for slot in (c2mop:class-slots class))
           (collecting (generate-slot-initialization-form

@@ -2,7 +2,7 @@
   (:use :cl)
   (:import-from :serapeum
                 #:lret #:not #:eval-always
-                #:flip)
+                #:flip #:~>)
   (:import-from :metabang-bind
                 #:bind)
   (:import-from :alexandria
