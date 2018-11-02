@@ -31,19 +31,20 @@
   (defun generate-type-forms (bindings class)
     (unless (null class)
       (let ((class (find-class class)))
-        (mapcar (lambda (form)
-                  (bind (((binding slot-name) form)
-                         (slot (slot-of-name class slot-name))
-                         (type (c2mop:slot-definition-type slot))
-                         (array (read-array slot))
-                         (fixed-dimensions (fixed-dimensions-p slot))
-                         (dimensions (read-dimensions-form slot)))
-                    (unless array
-                      (error "Slot ~a is not array in the class." slot-name))
-                    (if fixed-dimensions
-                        `(type (simple-array ,type (* ,@dimensions)) ,binding)
-                        `(type (simple-array ,type) ,binding))))
-                bindings)))))
+        (cons 'cl:declare
+              (mapcar (lambda (form)
+                        (bind (((binding slot-name) form)
+                               (slot (slot-of-name class slot-name))
+                               (type (c2mop:slot-definition-type slot))
+                               (array (read-array slot))
+                               (fixed-dimensions (fixed-dimensions-p slot))
+                               (dimensions (read-dimensions-form slot)))
+                          (unless array
+                            (error "Slot ~a is not array in the class." slot-name))
+                          (if fixed-dimensions
+                              `(type (simple-array ,type (* ,@dimensions)) ,binding)
+                              `(type (simple-array ,type) ,binding))))
+                      bindings))))))
 
 
 (eval-always
@@ -58,6 +59,6 @@
 
 (defmacro with-vector-class ((bindings instance index-form &optional class) &body body)
   `(let ,(generate-let-binding-forms bindings instance)
-     (declare ,@(generate-type-forms bindings class))
+     ,(generate-type-forms bindings class)
      (macrolet ,(generate-macrolet-binding-forms bindings index-form)
        ,@body)))
