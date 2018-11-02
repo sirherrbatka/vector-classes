@@ -23,4 +23,5 @@
   (defun slot-of-name (class slot-name)
     (check-type class cl:class)
     (let ((slots (c2mop:class-slots class)))
-      (find slot-name slots :key #'c2mop:slot-definition-name))))
+      (or (find slot-name slots :key #'c2mop:slot-definition-name)
+          (error "Slot ~a not found in the class." slot-name)))))
