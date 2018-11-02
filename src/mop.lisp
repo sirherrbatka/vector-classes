@@ -4,8 +4,7 @@
 (eval-always
   (defclass data-slot-definition (c2mop:standard-slot-definition)
     ((%dimensions-arg :initarg :dimensions-arg
-                      :reader read-dimensions-arg
-                      :initform nil)
+                      :reader read-dimensions-arg)
      (%dimensions-form :initarg :dimensions-form
                        :reader read-dimensions-form
                        :initform nil)
@@ -76,4 +75,7 @@
     (lret ((result (call-next-method)))
       (forward-added-slots result (car direct-slot-definitions))
       (setf (slot-value result '%dimensions-arg)
-            (mapcar #'read-dimensions-arg direct-slot-definitions)))))
+            (iterate
+              (for slot in direct-slot-definitions)
+              (when (slot-boundp slot '%dimensions-arg)
+                (collecting (read-dimensions-arg slot))))))))
