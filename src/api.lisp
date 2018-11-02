@@ -17,3 +17,10 @@
          (instance (allocate-data class size arguments)))
     (initialize-slots class instance arguments)
     instance))
+
+
+(defmacro with-vector-class ((bindings index-form &optional class) &body body)
+  `(let ,(generate-let-binding-forms bindings index-form class)
+     (declare ,@(generate-type-forms bindings index-form class))
+     (macrolet ,(generate-macrolet-binding-forms bindings index-form class)
+       ,@body)))
