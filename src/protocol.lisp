@@ -1,5 +1,6 @@
 (in-package :vector-classes)
 
+
 (eval-always
   (defgeneric allocate-data (class size arguments)
     (:method ((class fundamental-data) (size integer) arguments)
@@ -17,6 +18,7 @@
   (defun fixed-dimensions-p (slot)
     (check-type slot effective-data-slot-definition)
     (endp (read-dimensions-arg slot))))
+
 
 (eval-always
   (defun generate-array-initialization-form (slot size initargs)
