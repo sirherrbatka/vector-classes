@@ -1,15 +1,5 @@
 (in-package :vector-classes)
 
-
-(eval-always
-  (defclass fundamental-data ()
-    ((%size :initarg :size
-            :reader read-size
-            :array nil
-            :initform 0))
-    (:metaclass data-class)))
-
-
 (eval-always
   (defgeneric allocate-data (class size arguments)
     (:method ((class fundamental-data) (size integer) arguments)
@@ -28,34 +18,34 @@
     (check-type slot effective-data-slot-definition)
     (endp (read-dimensions-arg slot))))
 
-
-(defun generate-array-initialization-form (slot size initargs)
-  (let* ((initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
-         (slot-initform (when initform-present-p
-                          (c2mop:slot-definition-initform slot)))
-         (slot-initargs (c2mop:slot-definition-initargs slot))
-         (type (c2mop:slot-definition-type slot))
-         (dimensions-arg (read-dimensions-arg slot))
-         (dimensions-form (read-dimensions-form slot))
-         (!dims (gensym))
-         (!array (gensym))
-         (!val (gensym))
-         (!found (gensym)))
-    `(let* ((,!dims ,(if dimensions-arg
-                         `(or (getf-one-of-many ,initargs ,@dimensions-arg)
-                              ,dimensions-form)
-                          dimensions-form))
-            (,!array (make-array (cons ,size ,!dims) :element-type ',type))
-            (,!val (bind (((:values ,!val ,!found)
-                           (getf-one-of-many ,initargs ,@slot-initargs)))
-                     (if ,!found
-                         (constantly ,!val)
-                         ,(if initform-present-p
-                              `(lambda () ,slot-initform)
-                              nil)))))
-       (when ,!val
-         (map-into (unfold-array ,!array) ,!val))
-       ,!array)))
+(eval-always
+  (defun generate-array-initialization-form (slot size initargs)
+    (let* ((initform-present-p (not (null (c2mop:slot-definition-initfunction slot))))
+           (slot-initform (when initform-present-p
+                            (c2mop:slot-definition-initform slot)))
+           (slot-initargs (c2mop:slot-definition-initargs slot))
+           (type (c2mop:slot-definition-type slot))
+           (dimensions-arg (read-dimensions-arg slot))
+           (dimensions-form (read-dimensions-form slot))
+           (!dims (gensym))
+           (!array (gensym))
+           (!val (gensym))
+           (!found (gensym)))
+      `(let* ((,!dims ,(if dimensions-arg
+                           `(or (getf-one-of-many ,initargs ,@dimensions-arg)
+                                ,dimensions-form)
+                           dimensions-form))
+              (,!array (make-array (cons ,size ,!dims) :element-type ',type))
+              (,!val (bind (((:values ,!val ,!found)
+                             (getf-one-of-many ,initargs ,@slot-initargs)))
+                       (if ,!found
+                           (constantly ,!val)
+                           ,(if initform-present-p
+                                `(lambda () ,slot-initform)
+                                nil)))))
+         (when ,!val
+           (map-into (unfold-array ,!array) ,!val))
+         ,!array))))
 
 
 (eval-always
@@ -117,3 +107,12 @@ We need to establish proper initialize-slots function for each class. This metho
                                                      (find-class 'list))
                                  :qualifiers nil
                                  :lambda-list '(class instance initargs))))))
+
+
+(eval-always
+  (defclass fundamental-data ()
+    ((%size :initarg :size
+            :reader read-size
+            :array nil
+            :initform 0))
+    (:metaclass data-class)))
