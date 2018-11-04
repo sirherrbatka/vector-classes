@@ -2,19 +2,6 @@
 
 
 (eval-always
-  (defgeneric allocate-data (class size arguments)
-    (:method ((class fundamental-data) (size integer) arguments)
-      (check-type size non-negative-fixnum)
-      (check-type arguments list)
-      (lret (result (apply #'allocate-instance class arguments))
-        (setf (slot-value result '%size) size)))))
-
-
-(eval-always
-  (defgeneric initialize-slots (class instance arguments)))
-
-
-(eval-always
   (defun fixed-dimensions-p (slot)
     (check-type slot effective-data-slot-definition)
     (endp (read-dimensions-arg slot))))
@@ -88,6 +75,10 @@
                        slot 'instance 'initargs))))))
 
 
+(eval-always
+  (defgeneric initialize-slots (class instance arguments)))
+
+
 #|
 We need to establish proper initialize-slots function for each class. This method will take care of that.
 |#
@@ -118,3 +109,12 @@ We need to establish proper initialize-slots function for each class. This metho
             :array nil
             :initform 0))
     (:metaclass data-class)))
+
+
+(eval-always
+  (defgeneric allocate-data (class size arguments)
+    (:method ((class fundamental-data) (size integer) arguments)
+      (check-type size non-negative-fixnum)
+      (check-type arguments list)
+      (lret (result (apply #'allocate-instance class arguments))
+        (setf (slot-value result '%size) size)))))
