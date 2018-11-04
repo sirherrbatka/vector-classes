@@ -21,6 +21,14 @@
 
 
 (eval-always
+  (defmethod initialize-instance :after ((instance direct-data-slot-definition) &rest args)
+    (declare (ignore args))
+    (when (read-array instance)
+      (setf #1=(c2mop:slot-definition-type instance)
+            `(simple-array ,#1#)))))
+
+
+(eval-always
   (defclass effective-data-slot-definition (data-slot-definition
                                             c2mop:standard-effective-slot-definition)
     ()))

@@ -42,8 +42,8 @@
                           (unless array
                             (error "Slot ~a is not array in the class." slot-name))
                           (if fixed-dimensions
-                              `(type (simple-array ,type (* ,@dimensions)) ,binding)
-                              `(type (simple-array ,type) ,binding))))
+                              `(type (,@type (* ,@dimensions)) ,binding)
+                              `(type ,type ,binding))))
                       bindings))))))
 
 
