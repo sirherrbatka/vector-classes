@@ -57,7 +57,7 @@
             bindings)))
 
 
-(defmacro with-vector-class ((bindings instance index-form &optional class) &body body)
+(defmacro with-data ((bindings instance index-form &optional class) &body body)
   `(let ,(generate-let-binding-forms bindings instance)
      ,(generate-type-forms bindings class)
      (macrolet ,(generate-macrolet-binding-forms bindings index-form)

@@ -106,6 +106,7 @@ We need to establish proper initialize-slots function for each class. This metho
   (defclass fundamental-data ()
     ((%size :initarg :size
             :reader read-size
+            :reader size
             :array nil
             :initform 0))
     (:metaclass data-class)))
