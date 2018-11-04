@@ -1,0 +1,4 @@
+* Tasks
+** TODO Handle initialization of the :class allocated slots in the shared-initialize (probabbly?). Or simply dissalow combination of :class allocation and :array t.
+   [2018-11-04 nie]
+   [[file:~/quicklisp/local-projects/vector-classes/src/protocol.lisp::(c2mop:ensure-finalized%20instance)]]

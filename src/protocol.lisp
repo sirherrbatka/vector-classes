@@ -71,12 +71,14 @@
                 #+sbcl(sb-ext:muffle-conditions sb-ext:compiler-note))
       ,@(iterate
           (for slot in (c2mop:class-slots class))
-          (collecting (generate-slot-initialization-form
-                       slot 'instance 'initargs))))))
+          (unless (eq :class (c2mop:slot-definition-allocation slot)) ; initialization of :class slots does not belong here!
+            (collecting (generate-slot-initialization-form
+                         slot 'instance 'initargs)))))))
 
 
 (eval-always
-  (defgeneric initialize-slots (class instance arguments)))
+  (defgeneric initialize-slots (class instance arguments)
+    (:documentation "Internal function used to implement custom slot initialization logic. Implemented by generated code.")))
 
 
 #|
