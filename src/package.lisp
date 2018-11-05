@@ -15,4 +15,4 @@
                 #:curry #:rcurry #:when-let)
   (:import-from :iterate
                 #:iterate #:sum #:collecting
-                #:in #:for #:values))
+                #:in #:for #:values #:leave #:finally))

@@ -24,7 +24,7 @@
                            `(or (getf-one-of-many ,initargs ,@dimensions-arg)
                                 ,dimensions-form)
                            dimensions-form))
-              (,!array (make-array (cons ,size ,!dims) :element-type ',type))
+              (,!array (make-array (cons ,size ,!dims) :element-type ',(second type)))
               (,!val (bind (((:values ,!val ,!found)
                              (getf-one-of-many ,initargs ,@slot-initargs)))
                        (if ,!found
@@ -67,13 +67,13 @@
 (eval-always
   (defun generate-initialization-function (class)
     `(lambda (class instance initargs)
-       (declare (ignore class)
-                #+sbcl(sb-ext:muffle-conditions sb-ext:compiler-note))
-      ,@(iterate
-          (for slot in (c2mop:class-slots class))
-          (unless (eq :class (c2mop:slot-definition-allocation slot)) ; initialization of :class slots does not belong here!
-            (collecting (generate-slot-initialization-form
-                         slot 'instance 'initargs)))))))
+       (declare (declare (ignore class)))
+       ,@(iterate
+           (for slot in (c2mop:class-slots class))
+           (unless (or (eq :class (c2mop:slot-definition-allocation slot)) ; initialization of :class slots does not belong here!
+                       (eq (c2mop:slot-definition-name slot) '%size))
+             (collecting (generate-slot-initialization-form
+                          slot 'instance 'initargs)))))))
 
 
 (eval-always
@@ -92,22 +92,27 @@ We need to establish proper initialize-slots function for each class. This metho
     (declare (ignore initargs))
     (call-next-method)
     (c2mop:ensure-finalized instance)
-    (let* ((gf #'initialize-slots)
-           (lambda-form (generate-initialization-function instance)))
+    (bind ((gf #'initialize-slots)
+           (method-class (c2mop:generic-function-method-class gf))
+           (lambda-form (generate-initialization-function instance))
+           ((:values lambda _)
+            (c2mop:make-method-lambda gf
+                                      (c2mop:class-prototype method-class)
+                                      lambda-form
+                                      nil)))
       (add-method gf
-                  (make-instance 'standard-method
-                                 :function (compile nil lambda-form)
+                  (make-instance method-class
+                                 :function (compile nil lambda)
                                  :specializers (list (find-class 'data-class)
                                                      instance
                                                      (find-class 'list))
-                                 :qualifiers nil
+                                 :qualifiers ()
                                  :lambda-list '(class instance initargs))))))
 
 
 (eval-always
   (defclass fundamental-data ()
-    ((%size :initarg :size
-            :reader read-size
+    ((%size :reader read-size
             :reader size
             :array nil
             :initform 0))
@@ -115,9 +120,8 @@ We need to establish proper initialize-slots function for each class. This metho
 
 
 (eval-always
-  (defgeneric allocate-data (class size arguments)
-    (:method ((class fundamental-data) (size integer) arguments)
+  (defgeneric allocate-data (class size)
+    (:method ((class data-class) size)
       (check-type size non-negative-fixnum)
-      (check-type arguments list)
-      (lret (result (apply #'allocate-instance class arguments))
+      (lret ((result (allocate-instance class)))
         (setf (slot-value result '%size) size)))))

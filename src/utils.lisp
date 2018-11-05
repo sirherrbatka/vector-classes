@@ -1,16 +1,16 @@
 (in-package :vector-classes)
 
 
-(declaim (inline getf-one-of-many))
+(declaim (notinline getf-one-of-many))
 (defun getf-one-of-many (place &rest arguments)
   (iterate
-    (for v on place)
-    (for p-v previous v)
+    (for v on (rest place))
+    (for p-v previous v
+         initially place)
     (for k initially t then (not k))
-    (when (and k
-               (member p-v arguments))
-      (return (values v t))))
-  (values nil nil))
+    (when (and k (member (first p-v) arguments))
+      (leave (values (first v) t)))
+    (finally (return (values nil nil)))))
 
 
 (defun unfold-array (array)

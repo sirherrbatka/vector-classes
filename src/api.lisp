@@ -14,7 +14,7 @@
 
 (defmethod make-data (type size &rest arguments)
   (let* ((class (find-class type))
-         (instance (allocate-data class size arguments)))
+         (instance (allocate-data class size)))
     (initialize-slots class instance arguments)
     instance))
 
@@ -53,7 +53,7 @@
               (let ((binding (car form)))
                 `(,binding
                   (&rest args)
-                  `(aref ,,binding ,',index-form ,@args))))
+                  `(aref ,',binding ,',index-form ,@args))))
             bindings)))
 
 
