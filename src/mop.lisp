@@ -69,9 +69,15 @@
 
 (eval-always
   (defun direct-slot-definitions-compatible-p (direct-slot-definitions)
-    (let ((all-array (mapcar #'read-array direct-slot-definitions)))
-      (every (curry #'eql (first all-array))
-             (rest all-array)))))
+    (let ((all-array (mapcar #'read-array direct-slot-definitions))
+          (all-allocation (mapcar #'c2mop:slot-definition-allocation direct-slot-definitions)))
+      (and (every (curry #'eql (first all-array))
+                  (rest all-array))
+           (every (lambda (array allocation)
+                    (or (not array)
+                        (eq allocation :instance)))
+                  all-array
+                  all-allocation)))))
 
 
 (eval-always

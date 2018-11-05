@@ -61,3 +61,5 @@ For instance:
 #+END_SRC
 Will print every element of the %vectorized-data slot present of the instance constructed by the prior example. data-layer argument here designates the name of the class is optional, but once supplied
 allows to generate more efficient code.
+* Limitations
+Currently array slots can be only :instance allocated. It is possible to implement, but it may require complete reimplementation of initialization logic of the classes, and therefore I am hesitant to do so.

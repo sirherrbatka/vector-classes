@@ -92,14 +92,6 @@ We need to establish proper initialize-slots function for each class. This metho
     (declare (ignore initargs))
     (call-next-method)
     (c2mop:ensure-finalized instance)
-    ;; corner case, handling class allocated slots...
-    (iterate
-      (for slot in (~>> instance
-                        c2mop:class-slots
-                        (remove-if-not (curry #'eq :class)
-                                       _
-                                       :key #'c2mop:slot-definition-allocation)))
-      )
     (let* ((gf #'initialize-slots)
            (lambda-form (generate-initialization-function instance)))
       (add-method gf
