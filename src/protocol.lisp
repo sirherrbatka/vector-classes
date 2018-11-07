@@ -67,7 +67,7 @@
 (eval-always
   (defun generate-initialization-function (class)
     `(lambda (class instance initargs)
-       (declare (declare (ignore class)))
+       (declare (ignore class))
        ,@(iterate
            (for slot in (c2mop:class-slots class))
            (unless (or (eq :class (c2mop:slot-definition-allocation slot)) ; initialization of :class slots does not belong here!
